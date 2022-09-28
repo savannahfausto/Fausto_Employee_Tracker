@@ -58,76 +58,80 @@ const menu = function() {
 }
 
 const addEmployee = function () {
-    inquirer
-        .prompt(
-            {
-                type: 'input',
-                name: 'firstName',
-                message: "What is the employee's first name?"
-            },
-            {
-                type: 'input',
-                name: 'lastName',
-                message: "What is the employee's last name?"
-            },
-            {
-                type: 'list',
-                name: 'role',
-                message: "What is the employee's role?",
-                choices: [
-                    //how to insert roles
-                ]
-            },
-            {
-                type: 'list',
-                name: 'manager',
-                message: "Who is the employee's manager?",
-                choices: [
-                    //how to insert employee's who are managers?
-                ]
-            },
+    db.query('SELECT title AS name, id AS value FROM roles', function(err, roles){
+        if (err) throw err;
+        db.query('SELECT CONCAT(first_name," ",last_name) AS name, manager_id AS value FROM employees', function(err, employees){
+            if (err) throw err;
+        inquirer
+            .prompt(
+                {
+                    type: 'input',
+                    name: 'firstName',
+                    message: "What is the employee's first name?"
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: "What is the employee's last name?"
+                },
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: "What is the employee's role?",
+                    choices: roles, 
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    message: "Who is the employee's manager?",
+                    choices: employees,
+            
+                },
 
-        )
-        .then (answers => {
-            db.query('INSERT INTO employees SET ?', answers, function(err){
-                if (err) throw err;
-                console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
-                menu();
+            )
+            .then (answers => {
+                db.query('INSERT INTO employees SET ?', answers, function(err){
+                    if (err) throw err;
+                    console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
+                    menu();
+                })
             })
         })
+    })
 }
 
-const addRole = function () {
-    inquirer
-        .prompt(
-            {
-                type: 'input',
-                name: 'roleName',
-                message: "What is the name of the role?"
-            },
-            {
-                type: 'number',
-                name: 'salary',
-                message: "What is the salary of the role?"
-            },
-            {
-                type: 'list',
-                name: 'roleDepartment',
-                message: "Which department does the role belong to",
-                choices: [
-                    //how to insert departments
-                ]
-            },
-           
+    const addRole = function () {
+        db.query('SELECT name, id AS value FROM departments', function(err, departments){
+            if (err) throw err;
+        inquirer
+            .prompt(
+                {
+                    type: 'input',
+                    name: 'roleName',
+                    message: "What is the name of the role?"
+                },
+                {
+                    type: 'number',
+                    name: 'salary',
+                    message: "What is the salary of the role?"
+                },
+                {
+                    type: 'list',
+                    name: 'roleDepartment',
+                    message: "Which department does the role belong to",
+                    choices: departments,
+                },
+            
 
-        )
-        .then (answers => {
-            db.query('INSERT INTO employees SET ?', answers, function(err){
-                if (err) throw err;
-                console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
-                menu();
-            })
+            )
+            .then (answers => {
+                db.query('INSERT INTO employees SET ?', answers, function(err){
+                    if (err) throw err;
+                    console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
+                    menu();
+                })
         })
+    })
 }
 
 const addDepartment = function () {
@@ -173,30 +177,32 @@ const viewDepartments = function () {
 }
 
 const updateRole = function () {
+    db.query('SELECT CONCAT(first_name," ",last_name) AS name, id as value FROM employees', function(err, employees){
+        if (err) throw err;
+        db.query('SELECT title AS name, id as value FROM roles', function(err, roles){
+            if (err) throw err;
     inquirer
         .prompt(
             {
                 type: 'list',
                 name: 'updateEmployee',
                 message: "Which employee's role do you want to update?",
-                choices: [
-                    //how to insert employees
-                ]
+                choices: employees,
             },
             {
                 type: 'list',
                 name: 'updateRole',
                 message: "Which role do you want to assign the selected employee?",
-                choices: [
-                    //how to insert roles
-                ]
+                choices: roles, 
             },
         )
         .then (answers => {
-            db.query('INSERT INTO departments SET ?', answers, function(err){
+            db.query('UPDATE employees SET role_id = ? WHERE id = ?', [answers.updateRole, answers.updateEmployee], function(err){
                 if (err) throw err;
-                console.log(`Added ${answers.name} to the database.`);
+                console.log(`updated ${employees.find(e => e.value === answers.updateEmployee).name} to the database.`);
                 menu();
             })
         })
+    }) 
+    })
 }
