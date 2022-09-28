@@ -19,16 +19,16 @@ db.connect((err) => {
 
 const menu = function() {
     inquirer
-        .prompt(
+        .prompt([
             {
                 type: 'list',
                 name: 'menu',
                 message: "What would you like to do?",
                 choices: ["View All Employees", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "View All Departments", "Add Department", "Quit"]
             },
-        )
+        ])
         .then (answers => {
-            switch (answers) {
+            switch (answers.menu) {
                 case "View All Employees": 
                 viewEmployees();
                 break;
@@ -63,32 +63,32 @@ const addEmployee = function () {
         db.query('SELECT CONCAT(first_name," ",last_name) AS name, manager_id AS value FROM employees', function(err, employees){
             if (err) throw err;
         inquirer
-            .prompt(
+            .prompt([
                 {
                     type: 'input',
-                    name: 'firstName',
+                    name: 'first_name',
                     message: "What is the employee's first name?"
                 },
                 {
                     type: 'input',
-                    name: 'lastName',
+                    name: 'last_name',
                     message: "What is the employee's last name?"
                 },
                 {
                     type: 'list',
-                    name: 'role',
+                    name: 'role_id',
                     message: "What is the employee's role?",
                     choices: roles, 
                 },
                 {
                     type: 'list',
-                    name: 'manager',
+                    name: 'manager_id',
                     message: "Who is the employee's manager?",
                     choices: employees,
             
                 },
 
-            )
+            ])
             .then (answers => {
                 db.query('INSERT INTO employees SET ?', answers, function(err){
                     if (err) throw err;
@@ -104,10 +104,10 @@ const addEmployee = function () {
         db.query('SELECT name, id AS value FROM departments', function(err, departments){
             if (err) throw err;
         inquirer
-            .prompt(
+            .prompt([
                 {
                     type: 'input',
-                    name: 'roleName',
+                    name: 'title',
                     message: "What is the name of the role?"
                 },
                 {
@@ -117,13 +117,13 @@ const addEmployee = function () {
                 },
                 {
                     type: 'list',
-                    name: 'roleDepartment',
+                    name: 'department_id',
                     message: "Which department does the role belong to",
                     choices: departments,
                 },
             
 
-            )
+            ])
             .then (answers => {
                 db.query('INSERT INTO employees SET ?', answers, function(err){
                     if (err) throw err;
@@ -136,13 +136,13 @@ const addEmployee = function () {
 
 const addDepartment = function () {
     inquirer
-        .prompt(
+        .prompt([
             {
                 type: 'input',
                 name: 'name',
                 message: "What is the name of the department?"
             },
-        )
+        ])
         .then (answers => {
             db.query('INSERT INTO departments SET ?', answers, function(err){
                 if (err) throw err;
@@ -182,7 +182,7 @@ const updateRole = function () {
         db.query('SELECT title AS name, id as value FROM roles', function(err, roles){
             if (err) throw err;
     inquirer
-        .prompt(
+        .prompt([
             {
                 type: 'list',
                 name: 'updateEmployee',
@@ -195,7 +195,7 @@ const updateRole = function () {
                 message: "Which role do you want to assign the selected employee?",
                 choices: roles, 
             },
-        )
+        ])
         .then (answers => {
             db.query('UPDATE employees SET role_id = ? WHERE id = ?', [answers.updateRole, answers.updateEmployee], function(err){
                 if (err) throw err;
