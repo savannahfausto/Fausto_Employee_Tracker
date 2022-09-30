@@ -84,7 +84,7 @@ const addEmployee = function () {
                     type: 'list',
                     name: 'manager_id',
                     message: "Who is the employee's manager?",
-                    choices: employees,
+                    choices: employees, //how to add none option
             
                 },
 
@@ -92,7 +92,7 @@ const addEmployee = function () {
             .then (answers => {
                 db.query('INSERT INTO employees SET ?', answers, function(err){
                     if (err) throw err;
-                    console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
+                    console.log(`Added ${answers.first_name} ${answers.last_name}to the database.`);
                     menu();
                 })
             })
@@ -118,16 +118,16 @@ const addEmployee = function () {
                 {
                     type: 'list',
                     name: 'department_id',
-                    message: "Which department does the role belong to",
+                    message: "Which department does the role belong to?",
                     choices: departments,
                 },
             
 
             ])
             .then (answers => {
-                db.query('INSERT INTO employees SET ?', answers, function(err){
+                db.query('INSERT INTO roles SET ?', answers, function(err){
                     if (err) throw err;
-                    console.log(`Added ${answers.firstName} ${answers.lastName}to the database.`);
+                    console.log(`Added ${answers.title} to the database.`);
                     menu();
                 })
         })
@@ -151,19 +151,19 @@ const addDepartment = function () {
             })
         })
 }
-
+//change role_id from employees to title from roles, add department, add salary, add manager id from employees as manager first_name and last_name from employees
 const viewEmployees = function () {
     db.query('SELECT * FROM employees', function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         menu();
     });
 }
 
 const viewRoles = function () {
-    db.query('SELECT * FROM roles', function (err, results) {
+    db.query('SELECT roles.id, roles.title, departments.name AS department, salary FROM roles INNER JOIN departments ON roles.department_id = departments.id', function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         menu();
     });
 }
@@ -171,7 +171,7 @@ const viewRoles = function () {
 const viewDepartments = function () {
     db.query('SELECT * FROM departments', function (err, results) {
         if (err) throw err;
-        console.log(results);
+        console.table(results);
         menu();
     });
 }
