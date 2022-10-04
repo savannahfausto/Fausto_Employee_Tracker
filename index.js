@@ -60,7 +60,7 @@ const menu = function() {
 const addEmployee = function () {
     db.query('SELECT title AS name, id AS value FROM roles', function(err, roles){
         if (err) throw err;
-        db.query('SELECT CONCAT(first_name," ",last_name) AS name, manager_id AS value FROM employees', function(err, employees){
+        db.query('SELECT CONCAT(first_name," ",last_name) AS name, id AS value FROM employees', function(err, employees){
             if (err) throw err;
         inquirer
             .prompt([
@@ -84,15 +84,17 @@ const addEmployee = function () {
                     type: 'list',
                     name: 'manager_id',
                     message: "Who is the employee's manager?",
-                    choices: employees, //how to add none option
+                    choices: employees,
             
                 },
 
             ])
             .then (answers => {
+                console.log('answers', answers); 
+            
                 db.query('INSERT INTO employees SET ?', answers, function(err){
                     if (err) throw err;
-                    console.log(`Added ${answers.first_name} ${answers.last_name}to the database.`);
+                    console.log(`Added ${answers.first_name} ${answers.last_name} to the database.`);
                     menu();
                 })
             })
@@ -153,7 +155,7 @@ const addDepartment = function () {
 }
 //change role_id from employees to title from roles, add department, add salary, add manager id from employees as manager first_name and last_name from employees
 const viewEmployees = function () {
-    db.query('SELECT * FROM employees', function (err, results) {
+    db.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title as title, departments.name as department, roles.salary as salary, CONCAT(manager.first_name," ",manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id LEFT JOIN employees manager ON manager.id = employees.manager_id JOIN departments ON roles.department_id = departments.id', function (err, results) {
         if (err) throw err;
         console.table(results);
         menu();
