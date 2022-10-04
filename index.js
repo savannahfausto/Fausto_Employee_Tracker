@@ -1,6 +1,8 @@
+//import dependencies
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
+//creates connection to mySQL using credentials
 const db = mysql.createConnection(
     {
       host: 'localhost',
@@ -17,6 +19,7 @@ db.connect((err) => {
     menu();
 })
 
+//list of options user can choose, depending on user choice, will invoke corresponding function
 const menu = function() {
     inquirer
         .prompt([
@@ -62,6 +65,7 @@ const addEmployee = function () {
         if (err) throw err;
         db.query('SELECT CONCAT(first_name," ",last_name) AS name, id AS value FROM employees', function(err, employees){
             if (err) throw err;
+        //creates a none choice in the Who is the employee's manager? prompt by creating a new object and pushing it in to the employees array
         const noManager = { name: 'none', value: null }
         employees.push(noManager);
         
@@ -93,7 +97,7 @@ const addEmployee = function () {
 
             ])
             .then (answers => {
-                console.log('answers', answers); 
+                //console.log('answers', answers); 
             
                 db.query('INSERT INTO employees SET ?', answers, function(err){
                     if (err) throw err;
@@ -156,7 +160,7 @@ const addDepartment = function () {
             })
         })
 }
-//change role_id from employees to title from roles, add department, add salary, add manager id from employees as manager first_name and last_name from employees
+
 const viewEmployees = function () {
     db.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title as title, departments.name as department, roles.salary as salary, CONCAT(manager.first_name," ",manager.last_name) AS manager FROM employees INNER JOIN roles ON employees.role_id = roles.id LEFT JOIN employees manager ON manager.id = employees.manager_id JOIN departments ON roles.department_id = departments.id', function (err, results) {
         if (err) throw err;
@@ -204,6 +208,7 @@ const updateRole = function () {
         .then (answers => {
             db.query('UPDATE employees SET role_id = ? WHERE id = ?', [answers.updateRole, answers.updateEmployee], function(err){
                 if (err) throw err;
+                //gets the name of the employee that we are updating
                 console.log(`updated ${employees.find(e => e.value === answers.updateEmployee).name} to the database.`);
                 menu();
             })
