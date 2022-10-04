@@ -62,6 +62,9 @@ const addEmployee = function () {
         if (err) throw err;
         db.query('SELECT CONCAT(first_name," ",last_name) AS name, id AS value FROM employees', function(err, employees){
             if (err) throw err;
+        const noManager = { name: 'none', value: null }
+        employees.push(noManager);
+        
         inquirer
             .prompt([
                 {
